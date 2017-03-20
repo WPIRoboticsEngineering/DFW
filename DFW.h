@@ -9,17 +9,16 @@
 
 #include "Arduino.h"
 
-class DFW
-{
-  public:
-    DFW(int debugpin);
-    void begin(long baud, int port_num);
+class DFW {
+public:
+	DFW(int debugpin);
+	void begin(long baud, int port_num);
 	void update(void);
 	int joystickrv(void);
 	int joystickrh(void);
 	int joysticklv(void);
 	int joysticklh(void);
-    int start(void);
+	int start(void);
 	int select(void);
 	int one(void);
 	int two(void);
@@ -36,10 +35,8 @@ class DFW
 	int jr(void);
 	int jl(void);
 	void end(void);
-  private:
+private:
 
 };
-
-
 
 #endif
