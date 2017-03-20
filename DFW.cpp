@@ -78,7 +78,7 @@ void DFW::update(void)
     for (int i = 0; i < 2; i++)  {
       byteBu[i] = 127;
     }
-    for (int i = 0; i < 3; i++)  {
+    for (int i = 0; i <= 4; i++)  {
       byteAn[i] = 90;
     }
   }
