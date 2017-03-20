@@ -2,7 +2,7 @@
 //written by Joe St. Germain
 //For RBE Class use
 //joest@wpi.edu
-
+//@author Alex Taglieri (atags22)
 
 #ifndef DFW_h
 #define DFW_h
