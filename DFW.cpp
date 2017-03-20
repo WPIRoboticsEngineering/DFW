@@ -57,7 +57,7 @@ void DFW::update(void)
 	digitalWrite(debuginpin,0);
       lastTime = millis();
       //   Serial.println("B Lock");
-      for (int i = 0; i < 3; i++)  {
+      for (int i = 0; i < 5; i++)  {
         byteBu[i] = inByteB[i];
       }
     }
