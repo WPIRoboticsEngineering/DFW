@@ -14,27 +14,18 @@ DFW dfw(ledpindebug);  // Instantiates the DFW object and setting the debug pin.
 Servo rightmotor; // Servo object
 Servo leftmotor; // Servo object
 
-
 void setup() {
-  //Serial.begin(9600); // Serial output begin. Only needed for debug
-  dfw.begin(9600, 1); // Serial1 output begin for DFW library. Buad and port #."Serial1 only"
+  Serial.begin(9600); // Serial output begin. Only needed for debug
+  dfw.begin(); // Serial1 output begin for DFW library. Buad and port #."Serial1 only"
   leftmotor.attach(4, 1000, 2000); // left drive motor pin#, pulse time for 0,pulse time for 180
   rightmotor.attach(5, 1000, 2000); // right drive motor pin#, pulse time for 0,pulse time for 180
-  dfw.update();
-    while (dfw.start() == 0) { //waits for controller to init
-    Serial.println("init");
-    dfw.update();
-    delay(20);
-  }
-
 }
 
 void loop() {
-
-  dfw.update();// Called to update the controllers output. Do not call faster than every 15ms.
-  rightmotor.write(180-dfw.joystickrv());     //DFW.joystick will return 0-180 as an int into rightmotor.write
-  leftmotor.write(dfw.joysticklv());      //DFW.joystick will return 0-180 as an int into leftmotor.write
-  delay(20); // Servos do not like to be called faster than every 20 ms. Also the Serial data is sent every 15ms 
- 
+  dfw.run();// Called to update the controllers output. Do not call faster than every 15ms.
+  if(dfw.getCompetitionState() != powerup){
+	  rightmotor.write(180-dfw.joystickrv());     //DFW.joystick will return 0-180 as an int into rightmotor.write
+	  leftmotor.write(dfw.joysticklv());      //DFW.joystick will return 0-180 as an int into leftmotor.write
+  }
 }
 

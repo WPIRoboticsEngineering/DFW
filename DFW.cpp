@@ -10,72 +10,143 @@
 // baud = defualt is 9600
 //port_num = serial1  lowercase s defualt is serial1
 
-char inByteA[6];
-char inByteB[3];
-char byteAn[6];
-char byteBu[3];
-volatile long lastTime;
-volatile long hbTime;
-int debuginpin;
+void DFW::run(void) {
+	update();
+	unsigned long tmp = 0;
+	long timeDiff = 0;
+	switch (state) {
+	case powerup:
+		digitalWrite(debuginpin, 1);
+		Serial.println("\r\nwaiting for DWF init...");
+		if (!start()) {
+			state = waitForAuto;
+			Serial.println("\r\nwaiting for auto (press start)...");
+		} else
+			break;
+	case waitForAuto:
+		if (start()) {
+			state = Autonomous;
+			autoStartTime = millis(); // sets start time of autonomous
+			Serial.println("\r\nRunning Auto...");
+			// fall through when a state changes
+		} else
+			break;
 
-void DFW::update(void) {
-//Serial.println("updateing");
-//joystick packet
-	if (Serial1.find('A')) {
-		// Serial.println("A");
-		for (int i = 0; i < 6; i++) {
-			inByteA[i] = Serial1.read();
-		}
-
-		if (inByteA[5] == 'a') {
-			//Serial.println("A match");
-			lastTime = millis();
-			byteAn[1] = inByteA[1];
-			byteAn[2] = inByteA[2];
-			byteAn[3] = inByteA[3];
-			byteAn[4] = inByteA[4];
-			byteAn[5] = inByteA[5];
-			digitalWrite(debuginpin, 0);
-		}
-	}
-	//  for (int i = 0; i < 6; i++)
-	// {
-	// Serial.print(byteAn[i]);
-	// }
-
-// Button Packet
-	if (Serial1.find('B')) {
-		for (int i = 0; i < 3; i++) {
-			inByteB[i] = Serial1.read();
-		}
-		if (inByteB[2] == 'b') {
-			digitalWrite(debuginpin, 0);
-			lastTime = millis();
-			//   Serial.println("B Lock");
-			for (int i = 0; i < 5; i++) {
-				byteBu[i] = inByteB[i];
+	case Autonomous:
+		timeDiff = millis() - autoStartTime;
+		if (timeDiff > autoTime) {
+			state = waitForTeleop;
+			Serial.println("\r\nwaiting for teleop (press start)...");
+			// fall through when a state changes
+		} else {
+			tmp = millis();
+			if (myAutonomous != Null)
+				myAutonomous(autoTime - timeDiff, *this);
+			if (functionReturnTime < (millis() - tmp)) {
+				Serial.print(
+						"\r\n\r\nERROR!! user Functions should return in ");
+				Serial.print(functionReturnTime);
+				Serial.print(" ms, took ");
+				Serial.print((millis() - tmp));
+				Serial.println(" ms ");
 			}
+			break;
 		}
+
+	case waitForTeleop:
+		if (start()) {
+			state = Teleop;
+			teleopStartTime = millis(); // sets start time of autonomous
+			Serial.println("\r\nRunning Teleop...");
+			// fall through when a state changes
+		} else
+			break;
+	case Teleop:
+		timeDiff = millis() - teleopStartTime;
+		if (timeDiff > teleopTime) {
+			state = waitForAuto;
+			Serial.println("\r\nwaiting for auto (press start)...");
+		} else {
+			tmp = millis();
+			if (myTeleop != Null)
+				myTeleop(teleopTime - timeDiff, *this);
+			if (functionReturnTime < (millis() - tmp)) {
+				Serial.print(
+						"\r\n\r\nERROR!! user Functions should return in ");
+				Serial.print(functionReturnTime);
+				Serial.print(" ms, took ");
+				Serial.print((millis() - tmp));
+				Serial.println(" ms ");
+			}
+			break;
+		}
+
 	}
 
-	while (Serial1.available() > 0) {
-		char clearing = Serial1.read();
+}
+void DFW::update(void) {
+	while (Serial1.peek() != 'A' && Serial1.available() >= packetSize) {
+		char tmp = Serial1.read();
+	}
+	if (Serial1.peek() == 'A' && Serial1.available() >= packetSize) {
+		packet[0] = Serial1.read();
+		if (Serial1.peek() == 'c' && Serial1.available() >= (packetSize - 1)) {
+			for (int i = 1; i < packetSize; i++) {
+				packet[i] = Serial1.read();
+
+			}
+			if (packet[0] == 'A' && packet[1] == 'c' && packet[6] == 'a'
+					&& packet[9] == 'B' && packet[12] == 'b') {
+				for (int i = 0; i < 2; i++) {
+					byteBu[i] = packet[10 + i];
+				}
+				for (int i = 0; i < 4; i++) {
+					byteAn[i] = packet[2 + i];
+				}
+			}
+			lastHeartBeatTime = millis();
+		}
 	}
 
 	//Heartbeat need to read once every 1 seconds
-	hbTime = millis() - lastTime;
+	hbTime = millis() - lastHeartBeatTime;
 	if (hbTime > 1000) {
-		// Serial.println("HB tripped");
-		//Serial.println("HB");
+		Serial.print("\r\nHB tripped clearing data. Diff= ");
+		Serial.print(hbTime);
+		Serial.print(" lastTime = ");
+		Serial.print(lastHeartBeatTime);
+		Serial.print(" current Time = ");
+		Serial.print(millis());
 		digitalWrite(debuginpin, 1);
 		for (int i = 0; i < 2; i++) {
 			byteBu[i] = 127;
 		}
-		for (int i = 0; i <= 4; i++) {
+		for (int i = 0; i < 5; i++) {
 			byteAn[i] = 90;
 		}
-	}
+		return;
 
+	} else {
+		long timeSinceFlash = millis() - flashTime;
+		if (timeSinceFlash > 1000) {
+			flashTime = millis();
+		} else if (timeSinceFlash > 900) {
+			digitalWrite(debuginpin, 1);
+		} else {
+			digitalWrite(debuginpin, 0);
+		}
+	}
+}
+
+DFW::DFW(int debugpin, void (*autonomous)(long), void (*teleop)(long)) //13 is easiest
+		{
+	pinMode(debugpin, OUTPUT);
+	digitalWrite(debugpin, 0);
+	debuginpin = debugpin;
+	myAutonomous = autonomous;
+	myTeleop = teleop;
+	state = powerup;
+	//printing = false;
 }
 
 DFW::DFW(int debugpin)    //13 is easiest
@@ -83,225 +154,106 @@ DFW::DFW(int debugpin)    //13 is easiest
 	pinMode(debugpin, OUTPUT);
 	digitalWrite(debugpin, 0);
 	debuginpin = debugpin;
+	myAutonomous = Null;
+	myTeleop = Null;
+	state = powerup;
+	//printing = false;
+}
+CompetitionState DFW::getCompetitionState(void) {
+	return state;
+}
+void DFW::begin()    //serial1 is the only functional input
+{
+	Serial1.begin(9600);
+	Serial1.setTimeout(250);
+
 }
 
-void DFW::begin(long baud, int port)    //serial1 is the only functional input
+int DFW::joystickrv(void) {
+	return (unsigned char) byteAn[0];
+}
+
+int DFW::joystickrh(void) {
+	return (unsigned char) byteAn[1];
+}
+
+int DFW::joysticklv(void) {
+	return (unsigned char) byteAn[2];
+}
+
+int DFW::joysticklh(void) {
+	return (unsigned char) byteAn[3];
+}
+
+bool DFW::start(void) // returns start button state
 		{
-
-	switch (port) {
-	case 0:
-		Serial.begin(baud);
-		break;
-	case 1:
-		Serial1.begin(baud);
-		Serial1.setTimeout(250);
-		break;
-	case 2:
-		Serial2.begin(baud);
-		break;
-	case 3:
-		Serial3.begin(baud);
-		break;
-	default:
-		Serial1.begin(baud);
-		break;
-	}
+	return ((byteBu[1] & 0b00000010) == 0);
 }
 
-int DFW::joystickrv(void) // returns joystick right vertical
+bool DFW::select(void) // select button state
 		{
-//Serial.println("jrv");
-	unsigned char stickRv = byteAn[1];
-	return (stickRv);
+	return ((byteBu[1] & 0b00000001) == 0);
 }
 
-int DFW::joystickrh(void) // returns joystick right vertical
+bool DFW::one(void) //  button one state
 		{
-	unsigned char stickrh = byteAn[2];
-	return (stickrh);
+	return ((byteBu[0] & 0b01000000) == 0);
 }
 
-int DFW::joysticklv(void) // returns joystick right vertical
+bool DFW::two(void) // button two state
 		{
-	unsigned char sticklv = byteAn[3];
-	return (sticklv);
+	return ((byteBu[0] & 0b00100000) == 0);
 }
 
-int DFW::joysticklh(void) // returns joystick right vertical
+bool DFW::three(void) //button three state
 		{
-	unsigned char sticklh = byteAn[4];
-	return (sticklh);
+	return ((byteBu[0] & 0b00010000) == 0);
 }
 
-int DFW::start(void) // returns start button state 
+bool DFW::four(void) //button four state
 		{
-	int startB;
-	if (((byteBu[1] & 0b00000010) == 0b00000010)) {
-		startB = 1;
-	} else {
-		startB = 0;
-	}
-	return (startB);
+	return ((byteBu[0] & 0b00001000) == 0);
 }
 
-int DFW::select(void) // select button state
+bool DFW::up(void) //up button state
 		{
-	int selectB;
-	if (((byteBu[1] & 0b00000001) == 0b00000001)) {
-		selectB = 1;
-	} else {
-		selectB = 0;
-	}
-	return (selectB);
+	return ((byteBu[1] & 0b00001000) == 0);
 }
 
-int DFW::one(void) //  button one state
+bool DFW::down(void) //down button state
 		{
-	int oneB;
-	if (((byteBu[0] & 0b01000000) == 0b01000000)) {
-		oneB = 1;
-	} else {
-		oneB = 0;
-	}
-	return (oneB);
+	return ((byteBu[1] & 0b00000100) == 0);
 }
 
-int DFW::two(void) // button two state
+bool DFW::left(void) //left button state
 		{
-	int twoB;
-	if (((byteBu[0] & 0b00100000) == 0b00100000)) {
-		twoB = 1;
-	} else {
-		twoB = 0;
-	}
-	return (twoB);
+	return ((byteBu[1] & 0b00100000) == 0);
 }
 
-int DFW::three(void) //button three state
+bool DFW::right(void) //right button state
 		{
-	int threeB;
-	if (((byteBu[0] & 0b00010000) == 0b00010000)) {
-		threeB = 1;
-	} else {
-		threeB = 0;
-	}
-	return (threeB);
+	return ((byteBu[1] & 0b00010000) == 0);
 }
 
-int DFW::four(void) //button four state
+bool DFW::l1(void) //L1 button state
 		{
-	int fourB;
-	if (((byteBu[0] & 0b00001000) == 0b00001000)) {
-		fourB = 1;
-	} else {
-		fourB = 0;
-	}
-	return (fourB);
+	return ((byteBu[0] & 0b00000100) == 0);
 }
 
-int DFW::up(void) //up button state
+bool DFW::l2(void) //L2 button state
 		{
-	int upB;
-	if (((byteBu[1] & 0b00001000) == 0b00001000)) {
-		upB = 1;
-	} else {
-		upB = 0;
-	}
-	return (upB);
+	return ((byteBu[0] & 0b00000001) == 0);
 }
 
-int DFW::down(void) //down button state
+bool DFW::r1(void) //R1 button state
 		{
-	int downB;
-	if (((byteBu[1] & 0b00000100) == 0b00000100)) {
-		downB = 1;
-	} else {
-		downB = 0;
-	}
-	return (downB);
+	return ((byteBu[0] & 0b00000010) == 0);
 }
 
-int DFW::left(void) //left button state
+bool DFW::r2(void) //R2 button state
 		{
-	int leftB;
-	if (((byteBu[1] & 0b00100000) == 0b00100000)) {
-		leftB = 1;
-	} else {
-		leftB = 0;
-	}
-	return (leftB);
+	return ((byteBu[1] & 0b01000000) == 0);
 }
-
-int DFW::right(void) //right button state
-		{
-	int rightB;
-	if (((byteBu[1] & 0b00010000) == 0b00010000)) {
-		rightB = 1;
-	} else {
-		rightB = 0;
-	}
-	return (rightB);
-}
-
-int DFW::l1(void) //L1 button state
-		{
-	int l1B;
-	if (((byteBu[0] & 0b00000100) == 0b00000100)) {
-		l1B = 1;
-	} else {
-		l1B = 0;
-	}
-	return (l1B);
-}
-
-int DFW::l2(void) //L2 button state
-		{
-	int l2B;
-	if (((byteBu[0] & 0b00000001) == 0b00000001)) {
-		l2B = 1;
-	} else {
-		l2B = 0;
-	}
-	return (l2B);
-}
-
-int DFW::r1(void) //R1 button state
-		{
-	int r1B;
-	if (((byteBu[0] & 0b00000010) == 0b00000010)) {
-		r1B = 1;
-	} else {
-		r1B = 0;
-	}
-	return (r1B);
-}
-
-int DFW::r2(void) //R2 button state
-		{
-	int r2B;
-	if (((byteBu[1] & 0b01000000) == 0b01000000)) {
-		r2B = 1;
-	} else {
-		r2B = 0;
-	}
-	return (r2B);
-}
-// not implemented
-//int DFW::jr(void)//joystick right button state
-//{
-//char jrbuffer[1];
-//jrbuffer[0]=inByteB[1];
-//int jrB = atoi(jrbuffer);
-//return(jrB);
-//}
-// not implemented
-//int DFW::jl(void)//joystick left button state
-//{
-//char jlbuffer[1];
-//jlbuffer[0]=inByteB[2];
-//int jlB = atoi(jlbuffer);
-//return(jlB);
-//}
 
 void DFW::end(void) {
 	Serial1.end();

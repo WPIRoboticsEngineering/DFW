@@ -7,80 +7,80 @@
 #include <DFW.h> // DFW include
 
 int ledpindebug = 13;
-DFW dfw(ledpindebug);  // Instantiates the DFW object and setting the debug pin. The debug pin will be set high if no communication is seen after 2 seconds
+DFW dfw(ledpindebug); // Instantiates the DFW object and setting the debug pin. The debug pin will be set high if no communication is seen after 2 seconds
 void setup() {
-  Serial.begin(9600); // Serial output begin
-  dfw.begin(9600, 1); // Serial1 output begin for DFW library. Buad and port #."Serial1 only"
+	Serial.begin(9600); // Serial output begin
+	dfw.begin(); // Serial1 output begin for DFW library. Buad and port #."Serial1 only"
 }
 
 void loop() {
-  dfw.update();// Called to update the controllers output
-  if (dfw.start() == 0 ) {   //DFW.button() will return button state.Buttons defualt to 1. value switches to 0 when pressed
-    Serial.println("start");
-  }
-  if (dfw.select() == 0 ) {
-    Serial.println("select");
-  }
 
-  if (dfw.up() == 0 ) {
-    Serial.println("up");
-  }
-  if (dfw.down() == 0 ) {
-    Serial.println("down");
-  }
-  if (dfw.left() == 0 ) {
-    Serial.println("left");
-  }
-  if (dfw.right() == 0 ) {
-    Serial.println("right");
-  }
+	dfw.run(); // Called to update the controllers output
+	if (dfw.getCompetitionState() != powerup) {
+		if (dfw.start()) { //DFW.button() will return button state.Buttons defualt to 1. value switches to 0 when pressed
+			Serial.println("start");
+		}
+		if (dfw.select()) {
+			Serial.println("select");
+		}
 
-  if (dfw.r1() == 0 ) {
-    Serial.println("r1");
-  }
-  if (dfw.r2() == 0 ) {
-    Serial.println("r2");
-  }
-  if (dfw.l1() == 0 ) {
-    Serial.println("l1");
-  }
-  if (dfw.l2() == 0 ) {
-    Serial.println("l2");
-  }
-  if (dfw.one() == 0 ) {
-    Serial.println("one");
-  }
-  if (dfw.two() == 0 ) {
-    Serial.println("two");
-  }
-  if (dfw.three() == 0 ) {
-    Serial.println("three");
-  }
-  if (dfw.four() == 0 ) {
-    Serial.println("four");
-  }
+		if (dfw.up()) {
+			Serial.println("up");
+		}
+		if (dfw.down()) {
+			Serial.println("down");
+		}
+		if (dfw.left()) {
+			Serial.println("left");
+		}
+		if (dfw.right()) {
+			Serial.println("right");
+		}
 
-  if (dfw.joystickrh() > 92 | dfw.joystickrh() < 87) {  // prevents continous output.
-    Serial.print("joyrh:");
-    Serial.println(dfw.joystickrh());                 //DFW.joystick will return 0-180 as an int.
-  }
+		if (dfw.r1()) {
+			Serial.println("r1");
+		}
+		if (dfw.r2()) {
+			Serial.println("r2");
+		}
+		if (dfw.l1()) {
+			Serial.println("l1");
+		}
+		if (dfw.l2()) {
+			Serial.println("l2");
+		}
+		if (dfw.one()) {
+			Serial.println("one");
+		}
+		if (dfw.two()) {
+			Serial.println("two");
+		}
+		if (dfw.three()) {
+			Serial.println("three");
+		}
+		if (dfw.four()) {
+			Serial.println("four");
+		}
 
-  if (dfw.joystickrv() > 92 | dfw.joystickrv() < 87) {
-    Serial.print("joyrv:");
-    Serial.println(dfw.joystickrv());
-  }
+		if (dfw.joystickrh() > 92 | dfw.joystickrh() < 87) { // prevents continous output.
+			Serial.print("joyrh:");
+			Serial.println(dfw.joystickrh()); //DFW.joystick will return 0-180 as an int.
+		}
 
-  if (dfw.joysticklh() > 92 | dfw.joysticklh() < 87) {
-    Serial.print("joylh:");
-    Serial.println(dfw.joysticklh());
-  }
-  if (dfw.joysticklv() > 92 | dfw.joysticklv() < 87) {
-    Serial.print("joylv:");
-    Serial.println(dfw.joysticklv());
-  }
-  // put your main code here, to run repeatedly:
+		if (dfw.joystickrv() > 92 | dfw.joystickrv() < 87) {
+			Serial.print("joyrv:");
+			Serial.println(dfw.joystickrv());
+		}
 
-  delay(25);
+		if (dfw.joysticklh() > 92 | dfw.joysticklh() < 87) {
+			Serial.print("joylh:");
+			Serial.println(dfw.joysticklh());
+		}
+		if (dfw.joysticklv() > 92 | dfw.joysticklv() < 87) {
+			Serial.print("joylv:");
+			Serial.println(dfw.joysticklv());
+		}
+	}
 
 }
 
