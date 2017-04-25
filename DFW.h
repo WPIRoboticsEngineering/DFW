@@ -27,7 +27,10 @@ enum CompetitionState {
 class DFW {
 public:
 	DFW(int debugpin, void (*autonomous)( long,DFW &),
-			void (*teleop)( long,DFW &));
+			void (*teleop)( long,DFW &),
+			void (*robotShutdown)(void));
+	DFW(int debugpin, void (*autonomous)( long,DFW &),
+				void (*teleop)( long,DFW &));
 	DFW(int debugpin);
 	void begin();
 	void run();
@@ -57,6 +60,7 @@ private:
 	void update(void);
 	void (*myAutonomous)( long,DFW & );
 	void (*myTeleop)( long,DFW & );
+	void (*myrobotShutdown)( void);
 	long autoStartTime;
 	long teleopStartTime;
 	CompetitionState state;
@@ -71,5 +75,6 @@ private:
 
 void autonomous( long time,DFW & dfw);
 void teleop( long time,DFW & dfw);
+void robotShutdown(void);
 
 #endif

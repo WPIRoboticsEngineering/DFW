@@ -36,6 +36,8 @@ void DFW::run(void) {
 		timeDiff = millis() - autoStartTime;
 		if (timeDiff > autoTime) {
 			state = waitForTeleop;
+			if (myrobotShutdown != Null)
+				myrobotShutdown();
 			Serial.println("\r\nwaiting for teleop (press start)...");
 			// fall through when a state changes
 		} else {
@@ -139,6 +141,20 @@ void DFW::update(void) {
 }
 
 DFW::DFW(int debugpin, void (*autonomous)( long,DFW &),
+		void (*teleop)( long,DFW &),
+		void (*robotShutdown)(void))
+		{
+	pinMode(debugpin, OUTPUT);
+	digitalWrite(debugpin, 0);
+	debuginpin = debugpin;
+	myAutonomous = autonomous;
+	myTeleop = teleop;
+	myrobotShutdown = robotShutdown;
+	state = powerup;
+
+	//printing = false;
+}
+DFW::DFW(int debugpin, void (*autonomous)( long,DFW &),
 		void (*teleop)( long,DFW &))
 		{
 	pinMode(debugpin, OUTPUT);
@@ -146,7 +162,9 @@ DFW::DFW(int debugpin, void (*autonomous)( long,DFW &),
 	debuginpin = debugpin;
 	myAutonomous = autonomous;
 	myTeleop = teleop;
+	myrobotShutdown = Null;
 	state = powerup;
+
 	//printing = false;
 }
 
@@ -157,6 +175,7 @@ DFW::DFW(int debugpin)    //13 is easiest
 	debuginpin = debugpin;
 	myAutonomous = Null;
 	myTeleop = Null;
+	myrobotShutdown=Null;
 	state = powerup;
 	//printing = false;
 }

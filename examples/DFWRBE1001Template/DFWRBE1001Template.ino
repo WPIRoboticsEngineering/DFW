@@ -12,12 +12,24 @@
  * object as well as the amount of MS remaining.
  */
 #include <DFW.h>
+#include "MyRobot.h"
+
 int ledpindebug = 13; //Wireless controller Debug pin. If lit then there is no communication.
-DFW dfw(ledpindebug, autonomous, teleop); // Instantiates the DFW object and setting the debug pin. The debug pin will be set high if no communication is seen after 2 seconds
+DFW dfw(ledpindebug, autonomous, teleop,robotShutdown); // Instantiates the DFW object and setting the debug pin. The debug pin will be set high if no communication is seen after 2 seconds
+Arm myArm;
 void setup() {
 	Serial.begin(9600); // Serial output begin. Only needed for debug
 	dfw.begin(); // Serial1 output begin for DFW library. Buad and port #."Serial1 only"
+	myArm.initialize(1,2);
 }
 void loop() {
 	dfw.run();
+}
+
+void robotShutdown(void){
+	// this function shuts down your robot
+	myArm.robotShutdownFunction();
+}
+Arm getArm(){
+	return myArm;
 }
