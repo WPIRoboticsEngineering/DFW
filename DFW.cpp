@@ -86,7 +86,7 @@ void DFW::run(void) {
 }
 void DFW::update(void) {
 	while (Serial1.peek() != 'A' && Serial1.available() >= packetSize) {
-		char tmp = Serial1.read();
+		Serial1.read();
 	}
 	if (Serial1.peek() == 'A' && Serial1.available() >= packetSize) {
 		packet[0] = Serial1.read();
@@ -118,10 +118,10 @@ void DFW::update(void) {
 		Serial.print(" current Time = ");
 		Serial.print(millis());
 		digitalWrite(debuginpin, 1);
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < buttonBytes; i++) {
 			byteBu[i] = 127;
 		}
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < analogBytes; i++) {
 			byteAn[i] = 90;
 		}
 		return;
@@ -138,7 +138,8 @@ void DFW::update(void) {
 	}
 }
 
-DFW::DFW(int debugpin, void (*autonomous)(long), void (*teleop)(long)) //13 is easiest
+DFW::DFW(int debugpin, void (*autonomous)( long,DFW &),
+		void (*teleop)( long,DFW &))
 		{
 	pinMode(debugpin, OUTPUT);
 	digitalWrite(debugpin, 0);

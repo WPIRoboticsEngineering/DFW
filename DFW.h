@@ -26,8 +26,8 @@ enum CompetitionState {
 #define packetSize 15
 class DFW {
 public:
-	DFW(int debugpin, void (*autonomous)( long),
-			void (*teleop)( long));
+	DFW(int debugpin, void (*autonomous)( long,DFW &),
+			void (*teleop)( long,DFW &));
 	DFW(int debugpin);
 	void begin();
 	void run();

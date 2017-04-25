@@ -62,21 +62,21 @@ void loop() {
 			Serial.println("four");
 		}
 
-		if (dfw.joystickrh() > 92 | dfw.joystickrh() < 87) { // prevents continous output.
+		if ((dfw.joystickrh()) > 92 || (dfw.joystickrh() < 87)) { // prevents continous output.
 			Serial.print("joyrh:");
 			Serial.println(dfw.joystickrh()); //DFW.joystick will return 0-180 as an int.
 		}
 
-		if (dfw.joystickrv() > 92 | dfw.joystickrv() < 87) {
+		if ((dfw.joystickrv()) > 92 ||( dfw.joystickrv() < 87)) {
 			Serial.print("joyrv:");
 			Serial.println(dfw.joystickrv());
 		}
 
-		if (dfw.joysticklh() > 92 | dfw.joysticklh() < 87) {
+		if ((dfw.joysticklh()) > 92 ||( dfw.joysticklh() < 87)) {
 			Serial.print("joylh:");
 			Serial.println(dfw.joysticklh());
 		}
-		if (dfw.joysticklv() > 92 | dfw.joysticklv() < 87) {
+		if ((dfw.joysticklv()) > 92 || (dfw.joysticklv() < 87)) {
 			Serial.print("joylv:");
 			Serial.println(dfw.joysticklv());
 		}
