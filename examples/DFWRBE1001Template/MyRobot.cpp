@@ -10,12 +10,7 @@ void Arm::initialize(unsigned armMotorPin, unsigned armPotPin) {
 }
 
 void Arm::moveTo(unsigned position) {
-	while (true) {
-		int error = position - analogRead(potPin);
-		motor.write(90 + error / 5);
-		if (abs(error) < 20) break;
-	}
-	motor.write(90);
+	motor.write(position);
 }
 void Arm::robotShutdownFunction(void){
 	Serial.println("Here is where I shut down my robot code");
