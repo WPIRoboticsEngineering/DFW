@@ -13,4 +13,4 @@ public:
 
 };
 
-Arm getArm();
+Arm * getArm();

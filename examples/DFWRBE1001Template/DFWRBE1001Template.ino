@@ -20,7 +20,7 @@ Arm myArm;
 void setup() {
 	Serial.begin(9600); // Serial output begin. Only needed for debug
 	dfw.begin(); // Serial1 output begin for DFW library. Buad and port #."Serial1 only"
-	myArm.initialize(1,2);
+	getArm()->initialize(1,2);
 }
 void loop() {
 	dfw.run();
@@ -28,8 +28,8 @@ void loop() {
 
 void robotShutdown(void){
 	// this function shuts down your robot
-	myArm.robotShutdownFunction();
+	getArm()->robotShutdownFunction();
 }
-Arm getArm(){
-	return myArm;
+Arm * getArm(){
+	return &myArm;
 }

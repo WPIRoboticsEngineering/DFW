@@ -9,5 +9,5 @@ void teleop( long time,DFW & dfw) { // function definition
 	Serial.print("\tleft joystick: ");
 	Serial.print(dfw.joysticklv());
 	//Run functions in the robot class
-	getArm().moveTo(35);
+	getArm()->moveTo(35);
 }
