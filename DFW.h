@@ -27,6 +27,7 @@ enum CompetitionState {
 class DFW {
 public:
 	DFW(AbstractDFWRobot * myrobot);
+	DFW(int debugpin);
 	void begin();
 	void run();
 	int joystickrv(void);
@@ -52,6 +53,7 @@ public:
 	void end(void);
 	CompetitionState getCompetitionState(void);
 private:
+	void startup();
 	AbstractDFWRobot * robot;
 	void update(void);
 	long autoStartTime;

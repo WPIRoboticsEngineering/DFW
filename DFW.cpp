@@ -5,7 +5,6 @@
  */
 #include "Arduino.h"
 #include "DFW.h"
-
 // used in the setup portion of your program
 // baud = defualt is 9600
 //port_num = serial1  lowercase s defualt is serial1
@@ -23,6 +22,7 @@ void DFW::run(void) {
 			Serial.println("\r\nwaiting for auto (press start)...");
 		} else
 			break;
+			/* no break */
 	case waitForAuto:
 		if (start()) {
 			robot->robotStartup();
@@ -32,6 +32,7 @@ void DFW::run(void) {
 			// fall through when a state changes
 		} else
 			break;
+			/* no break */
 
 	case Autonomous:
 		timeDiff = millis() - autoStartTime;
@@ -53,6 +54,7 @@ void DFW::run(void) {
 			}
 			break;
 		}
+		/* no break */
 
 	case waitForTeleop:
 		if (start()) {
@@ -62,6 +64,7 @@ void DFW::run(void) {
 			// fall through when a state changes
 		} else
 			break;
+			/* no break */
 	case Teleop:
 		timeDiff = millis() - teleopStartTime;
 		if (timeDiff > teleopTime) {
@@ -138,48 +141,20 @@ void DFW::update(void) {
 	}
 }
 
-//DFW::DFW(int debugpin, void (*autonomous)( long,DFW &),
-//		void (*teleop)( long,DFW &),
-//		void (*robotShutdown)(void))
-//		{
-//	pinMode(debugpin, OUTPUT);
-//	digitalWrite(debugpin, 0);
-//	debuginpin = debugpin;
-//	myAutonomous = autonomous;
-//	myTeleop = teleop;
-//	myrobotShutdown = robotShutdown;
-//	state = powerup;
-//
-//	//printing = false;
-//}
-//DFW::DFW(int debugpin, void (*autonomous)( long,DFW &),
-//		void (*teleop)( long,DFW &))
-//		{
-//	pinMode(debugpin, OUTPUT);
-//	digitalWrite(debugpin, 0);
-//	debuginpin = debugpin;
-//	myAutonomous = autonomous;
-//	myTeleop = teleop;
-//	myrobotShutdown = Null;
-//	state = powerup;
-//
-//	//printing = false;
-//}
-//
-//DFW::DFW(int debugpin)    //13 is easiest
-//		{
-//	pinMode(debugpin, OUTPUT);
-//	digitalWrite(debugpin, 0);
-//	debuginpin = debugpin;
-//	myAutonomous = Null;
-//	myTeleop = Null;
-//	myrobotShutdown=Null;
-//	state = powerup;
-//	//printing = false;
-//}
 DFW::DFW(AbstractDFWRobot * myrobot){
 	robot=myrobot;
+	startup();
 }
+DFW::DFW(int debugpin){
+	robot=new DymmyDFWRobot(debugpin);
+	startup();
+}
+void DFW::startup(){
+	state = powerup;
+	pinMode(robot->getDebugLEDPin(), OUTPUT);
+	digitalWrite(robot->getDebugLEDPin(), 0);
+};
+
 CompetitionState DFW::getCompetitionState(void) {
 	return state;
 }

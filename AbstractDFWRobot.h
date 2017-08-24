@@ -39,5 +39,21 @@ public:
 	virtual int getDebugLEDPin(void)=0;
 };
 
+class DymmyDFWRobot:public AbstractDFWRobot{
+	int ledNum=13;
+public:
+	DymmyDFWRobot(int num){
+		ledNum=num;
+	}
+	void robotStartup(){}
+	 void autonomous( long){};
+	 void teleop( long){};
+	 void robotShutdown(void){};
+	int getDebugLEDPin(void){
+		return ledNum;
+	};
+};
+
+
 
 #endif /* LIBRARIES_DFW_ABSTRACTDFWROBOT_H_ */
