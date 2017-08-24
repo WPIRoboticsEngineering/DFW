@@ -16,7 +16,7 @@ void DFW::run(void) {
 	long timeDiff = 0;
 	switch (state) {
 	case powerup:
-		digitalWrite(debuginpin, 1);
+		digitalWrite(robot->getDebugLEDPin(), 1);
 		Serial.println("\r\nwaiting for DWF init...");
 		if (!start()) {
 			state = waitForAuto;
@@ -25,6 +25,7 @@ void DFW::run(void) {
 			break;
 	case waitForAuto:
 		if (start()) {
+			robot->robotStartup();
 			state = Autonomous;
 			autoStartTime = millis(); // sets start time of autonomous
 			Serial.println("\r\nRunning Auto...");
@@ -36,14 +37,12 @@ void DFW::run(void) {
 		timeDiff = millis() - autoStartTime;
 		if (timeDiff > autoTime) {
 			state = waitForTeleop;
-			if (myrobotShutdown != Null)
-				myrobotShutdown();
+			robot->robotShutdown();
 			Serial.println("\r\nwaiting for teleop (press start)...");
 			// fall through when a state changes
 		} else {
 			tmp = millis();
-			if (myAutonomous != Null)
-				myAutonomous(autoTime - timeDiff, *this);
+			robot->autonomous(autoTime - timeDiff);
 			if (functionReturnTime < (millis() - tmp)) {
 				Serial.print(
 						"\r\n\r\nERROR!! user Functions should return in ");
@@ -70,8 +69,7 @@ void DFW::run(void) {
 			Serial.println("\r\nwaiting for auto (press start)...");
 		} else {
 			tmp = millis();
-			if (myTeleop != Null)
-				myTeleop(teleopTime - timeDiff, *this);
+			robot->teleop(teleopTime - timeDiff);
 			if (functionReturnTime < (millis() - tmp)) {
 				Serial.print(
 						"\r\n\r\nERROR!! user Functions should return in ");
@@ -119,7 +117,7 @@ void DFW::update(void) {
 		Serial.print(lastHeartBeatTime);
 		Serial.print(" current Time = ");
 		Serial.print(millis());
-		digitalWrite(debuginpin, 1);
+		digitalWrite(robot->getDebugLEDPin(), 1);
 		for (int i = 0; i < buttonBytes; i++) {
 			byteBu[i] = 127;
 		}
@@ -133,51 +131,54 @@ void DFW::update(void) {
 		if (timeSinceFlash > 1000) {
 			flashTime = millis();
 		} else if (timeSinceFlash > 900) {
-			digitalWrite(debuginpin, 1);
+			digitalWrite(robot->getDebugLEDPin(), 1);
 		} else {
-			digitalWrite(debuginpin, 0);
+			digitalWrite(robot->getDebugLEDPin(), 0);
 		}
 	}
 }
 
-DFW::DFW(int debugpin, void (*autonomous)( long,DFW &),
-		void (*teleop)( long,DFW &),
-		void (*robotShutdown)(void))
-		{
-	pinMode(debugpin, OUTPUT);
-	digitalWrite(debugpin, 0);
-	debuginpin = debugpin;
-	myAutonomous = autonomous;
-	myTeleop = teleop;
-	myrobotShutdown = robotShutdown;
-	state = powerup;
-
-	//printing = false;
-}
-DFW::DFW(int debugpin, void (*autonomous)( long,DFW &),
-		void (*teleop)( long,DFW &))
-		{
-	pinMode(debugpin, OUTPUT);
-	digitalWrite(debugpin, 0);
-	debuginpin = debugpin;
-	myAutonomous = autonomous;
-	myTeleop = teleop;
-	myrobotShutdown = Null;
-	state = powerup;
-
-	//printing = false;
-}
-
-DFW::DFW(int debugpin)    //13 is easiest
-		{
-	pinMode(debugpin, OUTPUT);
-	digitalWrite(debugpin, 0);
-	debuginpin = debugpin;
-	myAutonomous = Null;
-	myTeleop = Null;
-	myrobotShutdown=Null;
-	state = powerup;
-	//printing = false;
+//DFW::DFW(int debugpin, void (*autonomous)( long,DFW &),
+//		void (*teleop)( long,DFW &),
+//		void (*robotShutdown)(void))
+//		{
+//	pinMode(debugpin, OUTPUT);
+//	digitalWrite(debugpin, 0);
+//	debuginpin = debugpin;
+//	myAutonomous = autonomous;
+//	myTeleop = teleop;
+//	myrobotShutdown = robotShutdown;
+//	state = powerup;
+//
+//	//printing = false;
+//}
+//DFW::DFW(int debugpin, void (*autonomous)( long,DFW &),
+//		void (*teleop)( long,DFW &))
+//		{
+//	pinMode(debugpin, OUTPUT);
+//	digitalWrite(debugpin, 0);
+//	debuginpin = debugpin;
+//	myAutonomous = autonomous;
+//	myTeleop = teleop;
+//	myrobotShutdown = Null;
+//	state = powerup;
+//
+//	//printing = false;
+//}
+//
+//DFW::DFW(int debugpin)    //13 is easiest
+//		{
+//	pinMode(debugpin, OUTPUT);
+//	digitalWrite(debugpin, 0);
+//	debuginpin = debugpin;
+//	myAutonomous = Null;
+//	myTeleop = Null;
+//	myrobotShutdown=Null;
+//	state = powerup;
+//	//printing = false;
+//}
+DFW::DFW(AbstractDFWRobot * myrobot){
+	robot=myrobot;
 }
 CompetitionState DFW::getCompetitionState(void) {
 	return state;

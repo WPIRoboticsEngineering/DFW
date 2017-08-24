@@ -13,7 +13,7 @@
 #define DFW_h
 
 #include "Arduino.h"
-
+#include "AbstractDFWRobot.h"
 #define autoTime 20000
 #define teleopTime  120000
 #define functionReturnTime  100
@@ -26,12 +26,7 @@ enum CompetitionState {
 #define packetSize 15
 class DFW {
 public:
-	DFW(int debugpin, void (*autonomous)( long,DFW &),
-			void (*teleop)( long,DFW &),
-			void (*robotShutdown)(void));
-	DFW(int debugpin, void (*autonomous)( long,DFW &),
-				void (*teleop)( long,DFW &));
-	DFW(int debugpin);
+	DFW(AbstractDFWRobot * myrobot);
 	void begin();
 	void run();
 	int joystickrv(void);
@@ -57,10 +52,8 @@ public:
 	void end(void);
 	CompetitionState getCompetitionState(void);
 private:
+	AbstractDFWRobot * robot;
 	void update(void);
-	void (*myAutonomous)( long,DFW & );
-	void (*myTeleop)( long,DFW & );
-	void (*myrobotShutdown)( void);
 	long autoStartTime;
 	long teleopStartTime;
 	CompetitionState state;
@@ -70,7 +63,6 @@ private:
 	long lastHeartBeatTime;
 	long hbTime;
 	long flashTime;
-	int debuginpin;
 };
 
 void autonomous( long time,DFW & dfw);

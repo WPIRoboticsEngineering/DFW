@@ -8,6 +8,15 @@
 #include <DFW.h> // DFW include
 #include <Servo.h> // servo library
 
+class DFWRobot:public AbstractDFWRobot{
+public:
+	virtual void robotStartup()=0;
+	virtual void autonomous( long,DFW &)=0;
+	virtual void teleop( long,DFW &)=0;
+	virtual void robotShutdown(void)=0;
+	virtual int getDebugLEDPin(void)=0;
+};
+
 int ledpindebug = 13; //Wireless controller Debug pin. If lit then there is no communication.
 
 DFW dfw(ledpindebug);  // Instantiates the DFW object and setting the debug pin. The debug pin will be set high if no communication is seen after 2 seconds
