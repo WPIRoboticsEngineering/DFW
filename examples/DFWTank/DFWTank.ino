@@ -8,33 +8,42 @@
 #include <DFW.h> // DFW include
 #include <Servo.h> // servo library
 
-class DFWRobot:public AbstractDFWRobot{
+class DFWRobot:public AbstractDFWRobot{\
+	Servo rightmotor; // Servo object
+	Servo leftmotor; // Servo object
+
 public:
-	virtual void robotStartup()=0;
-	virtual void autonomous( long,DFW &)=0;
-	virtual void teleop( long,DFW &)=0;
-	virtual void robotShutdown(void)=0;
-	virtual int getDebugLEDPin(void)=0;
+	DFW * dfwPointer;
+	void robotStartup(){
+	  leftmotor.attach(4, 1000, 2000); // left drive motor pin#, pulse time for 0,pulse time for 180
+	  rightmotor.attach(5, 1000, 2000); // right drive motor pin#, pulse time for 0,pulse time for 180
+	}
+	 void autonomous( long time){};
+	 void teleop(long time){
+		  if(dfwPointer->getCompetitionState() != powerup){
+			  rightmotor.write(180-dfwPointer->joystickrv());     //DFW.joystick will return 0-180 as an int into rightmotor.write
+			  leftmotor.write(dfwPointer->joysticklv());      //DFW.joystick will return 0-180 as an int into leftmotor.write
+		  }
+	};
+	 void robotShutdown(void){};
+	int getDebugLEDPin(void){
+		return 13;
+	};
 };
 
-int ledpindebug = 13; //Wireless controller Debug pin. If lit then there is no communication.
+DFWRobot robot;
+DFW dfw(& robot );  // Instantiates the DFW object and setting the debug pin. The debug pin will be set high if no communication is seen after 2 seconds
 
-DFW dfw(ledpindebug);  // Instantiates the DFW object and setting the debug pin. The debug pin will be set high if no communication is seen after 2 seconds
-Servo rightmotor; // Servo object
-Servo leftmotor; // Servo object
 
 void setup() {
   Serial.begin(9600); // Serial output begin. Only needed for debug
   dfw.begin(); // Serial1 output begin for DFW library. Buad and port #."Serial1 only"
-  leftmotor.attach(4, 1000, 2000); // left drive motor pin#, pulse time for 0,pulse time for 180
-  rightmotor.attach(5, 1000, 2000); // right drive motor pin#, pulse time for 0,pulse time for 180
+  robot.robotStartup();// force a robot startup for testing
+  robot.dfwPointer=&dfw;// pass a controller to the robot
 }
 
 void loop() {
   dfw.run();// Called to update the controllers output. Do not call faster than every 15ms.
-  if(dfw.getCompetitionState() != powerup){
-	  rightmotor.write(180-dfw.joystickrv());     //DFW.joystick will return 0-180 as an int into rightmotor.write
-	  leftmotor.write(dfw.joysticklv());      //DFW.joystick will return 0-180 as an int into leftmotor.write
-  }
+  robot.teleop(0);// run the teleop function manually
 }
 
