@@ -34,14 +34,10 @@ public:
 	 */
 	 int getDebugLEDPin(void){return 13;};
 
-	void initialize();
+	void initialize(unsigned armMotorPin, unsigned armPotPin);
 	void moveTo(unsigned position);
 	~MyRobot(){};
 private:
 	unsigned potPin;
 	Servo motor;
 };
-
-//Added by Sloeber 
-#pragma once
-
