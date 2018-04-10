@@ -22,7 +22,7 @@ void setup() {
 	Serial.begin(9600); // Serial output begin. Only needed for debug
 	dfw.begin(); // Serial1 output begin for DFW library. Buad and port #."Serial1 only"
 	myRobotInstance.initialize();
-	myRobotInstance.dfw=&dfw;
+	myRobotInstance.dfw=&dfw;// add a reference to the controller to your robot. this lets you control your robot
 }
 void loop() {
 	dfw.run();
