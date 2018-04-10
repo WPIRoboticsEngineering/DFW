@@ -3,10 +3,10 @@
 /**
  * These are the execution runtions
  */
-void MyRobot::initialize(unsigned armMotorPin, unsigned armPotPin) {
-	potPin = armPotPin;
-	pinMode(armMotorPin, INPUT);
-	motor.attach(armMotorPin, 1000, 2000);
+void MyRobot::initialize() {
+	potPin = A1;
+	pinMode(5, INPUT);
+	motor.attach(5, 1000, 2000);
 }
 
 void MyRobot::moveTo(unsigned position) {

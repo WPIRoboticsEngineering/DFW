@@ -8,7 +8,7 @@
 #include <DFW.h> // DFW include
 #include <Servo.h> // servo library
 
-class DFWRobot:public AbstractDFWRobot{\
+class DFWRobot:public AbstractDFWRobot{
 	Servo rightmotor; // Servo object
 	Servo leftmotor; // Servo object
 
