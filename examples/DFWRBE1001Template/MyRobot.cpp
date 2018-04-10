@@ -7,6 +7,8 @@ void MyRobot::initialize() {
 	potPin = A1;
 	pinMode(5, INPUT);
 	motor.attach(5, 1000, 2000);
+	Serial.println("Here is where I initialize my robot code");
+
 }
 
 void MyRobot::moveTo(unsigned position) {
@@ -17,6 +19,7 @@ void MyRobot::moveTo(unsigned position) {
  * Called when the start button is pressed and the robot control begins
  */
  void MyRobot::robotStartup(){
+		Serial.println("Here is where I re-initialize my robot code");
 
  }
 /**
