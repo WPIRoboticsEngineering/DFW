@@ -24,21 +24,6 @@ byte written=0;
 
 #define virbrationMotorPin 2
 
-void setup() {
-	Serial1.begin(9600); //Init the Serial1 port to enable the xbee wireless communication
-	InitIO();             //Initialize the inputs/outputs and the buffers
-	while (!Serial1) {             //wait for serial to init
-	}
-  DataUpdate();  //read the buttons and the joysticks
-  if(!buttonState[4]){// sheckStart button on boot
-        provisionTerminal = true;
-        
-  }
-  if(provisionTerminal){// sheckStart button on boot
-        Serial.begin(9600); // Serial output begin. Only needed for debug
-        Serial.println("Starting with provision terminal");
-  }
-}
 
 void InitIO() {
 	for (int i = 0; i < 17; i++)
@@ -168,19 +153,6 @@ void provisionTerminalRun(){
   }
 }
 
-void loop() {
-	if (millis() - timer > 25) { // manage the updating freq of all the controlling information
-		// Serial.println("updating and sending");
-		DataUpdate();  //read the buttons and the joysticks
-		if(!provisionTerminal)
-		  printData();   //prints the data and states
-		timer = millis();
-	}
- if(provisionTerminal){
-  provisionTerminalRun();
- }
-
-}
 
 void DataUpdate() { //updates joysticks and buttons
 
@@ -214,6 +186,7 @@ void DataUpdate() { //updates joysticks and buttons
 	buttonByte2 |= buttonState[7] << 2; // Button down
 	buttonByte2 |= buttonState[4] << 1; // Button start
 	buttonByte2 |= buttonState[3] << 0; // Button select
+
 }
 
 void printData() {
@@ -237,4 +210,40 @@ void printData() {
 	Serial1.write(joy3); //0-180 11
 	Serial1.print('a'); // end byte 12
 	Serial1.println(); // 13
+}
+
+void setup() {
+  Serial1.begin(9600); //Init the Serial1 port to enable the xbee wireless communication
+  InitIO();             //Initialize the inputs/outputs and the buffers
+  while (!Serial1) {             //wait for serial to init
+  }
+  DataUpdate();  //read the buttons and the joysticks
+  if(!buttonState[4]){// sheckStart button on boot
+        provisionTerminal = true;
+        
+  }
+  if(provisionTerminal){// sheckStart button on boot
+        Serial.begin(9600); // Serial output begin. Only needed for debug
+        Serial.println("Starting with provision terminal");
+  }
+}
+
+void loop() {
+  if (millis() - timer > 25) { // manage the updating freq of all the controlling information
+    // Serial.println("updating and sending");
+    DataUpdate();  //read the buttons and the joysticks
+    if(!provisionTerminal)
+      printData();   //prints the data and states
+    timer = millis();
+  }
+  
+ if(provisionTerminal){
+  provisionTerminalRun();
+ }else if(!buttonState[4] && !buttonState[3]){
+        Serial.begin(9600); // Serial output begin. Only needed for debug
+        Serial.println("Starting with provision terminal");
+        provisionTerminal=true;
+ }
+ 
+
 }
