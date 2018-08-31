@@ -13,10 +13,9 @@
  */
 #include <DFW.h>
 #include "MyRobot.h"
-#include <Arduino.h>
 
-MyRobot myRobotInstance;
-DFW dfw(&myRobotInstance); // Instantiates the DFW object and setting the debug pin. The debug pin will be set high if no communication is seen after 2 seconds
+MyRobot myArm;
+DFW dfw(&myArm); // Instantiates the DFW object and setting the debug pin. The debug pin will be set high if no communication is seen after 2 seconds
 
 void setup() {
 	Serial.begin(9600); // Serial output begin. Only needed for debug
