@@ -1,23 +1,12 @@
 #include "MyRobot.h"
 #include "Arduino.h"
-/**
- * These are the execution runtions
- */
-void MyRobot::initialize(unsigned armMotorPin, unsigned armPotPin) {
-	potPin = armPotPin;
-	pinMode(armMotorPin, INPUT);
-	motor.attach(armMotorPin, 1000, 2000);
-}
 
-void MyRobot::moveTo(unsigned position) {
-	motor.write(position);
-}
 
 /**
  * Called when the start button is pressed and the robot control begins
  */
  void MyRobot::robotStartup(){
-
+		Serial.println("Here is where I start up my robot code");
  }
 /**
  * Called by the controller between communication with the wireless controller
@@ -43,7 +32,6 @@ void MyRobot::moveTo(unsigned position) {
 		Serial.print("\tleft joystick: ");
 		Serial.print(dfw->joysticklv());
 		//Run functions in the robot class
-		moveTo(35);
  }
 /**
  * Called at the end of control to reset the objects for the next start
