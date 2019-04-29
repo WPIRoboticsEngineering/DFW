@@ -69,6 +69,7 @@ void DFW::run(void) {
 		timeDiff = millis() - teleopStartTime;
 		if (timeDiff > teleopTime) {
 			state = waitForAuto;
+			robot->robotShutdown();
 			Serial.println("\r\nwaiting for auto (press start)...");
 		} else {
 			tmp = millis();
